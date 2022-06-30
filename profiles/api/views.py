@@ -90,7 +90,7 @@ class ProfileListApiView(generics.GenericAPIView):
     serializer_class = ProfileSerializer
 
     def get(self, request, *args, **kwargs):
-        blocked_list=request.user.parents.all()
+        blocked_list = request.user.activity_block_from.all()
         profile_list = Profiles.objecs.exclude(user__id=blocked_list)
         serializer = self.serializer_class(instance=profile_list, many=True)
         context = {
