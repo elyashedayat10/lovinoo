@@ -1,23 +1,27 @@
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
+from django_filters import rest_framework as filters
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
-from ..models import Image
+# from .filters import ProfileFilterSet
+from utils.city import cities
+
+from ..models import Image, Profile
 from .permissions import OwnerPermissions
-from .serializers import ImageSerializer, ProfileSerializer
+from .serializers import (ImageSerializer, ProfileImageSerializer,
+                          ProfileSerializer)
 
-
-# class ProfileListApiView(generics.GenericAPIView):
-# serializer_class =
-# def get(self,request,*args,**kwargs):
+user = get_user_model()
 
 
 class ProfileApiView(generics.GenericAPIView):
     serializer_class = ProfileSerializer
 
     def get(self, request, *args, **kwargs):
-        serializer = self.serializer_class(instance=request.user.profile)
+        serializer = self.serializer_class(instance=request.user.profile,context={'request':request})
         context = {
             'is_done': True,
             'message': 'اطاعات کاربر برای شما ارسال شد',
@@ -25,22 +29,24 @@ class ProfileApiView(generics.GenericAPIView):
         }
         return Response(data=context, status=status.HTTP_200_OK)
 
+
     def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(instance=request.user.profile, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
+        try:
+            serializer = self.serializer_class(instance=request.user.profile, data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save(user=request.user)
+                context = {
+                    'is_done': True,
+                    'message': 'اطاعات کاربر با موفقیت به روزرسانی شد',
+                    'data': serializer.data
+                }
+                return Response(data=context, status=status.HTTP_200_OK)
+        except:
             context = {
-                'is_done': True,
-                'message': 'اطاعات کاربر با موفقیت به روزرسانی شد',
-                'data': serializer.data
+                'is_done': False,
+                'message': 'خطا در به روزرسانی کاربر',
             }
-            return Response(data=context, status=status.HTTP_200_OK)
-        context = {
-            'is_done': False,
-            'message': 'خطا در به روزرسانی کاربر',
-            'data': serializer.errors
-        }
-        return Response(data=context, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=context, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserImageUploadApiView(generics.GenericAPIView):
@@ -54,13 +60,12 @@ class UserImageUploadApiView(generics.GenericAPIView):
             context = {
                 'is_done': True,
                 'message': 'عکس با موفقیت اپلود شد',
-                'data': serializer.data
             }
             return Response(data=context, status=status.HTTP_200_OK)
         context = {
             'is_done': False,
             'message': 'خطلا در اپلود پروفایل',
-            'data': serializer.data
+            'data': serializer.errores
         }
         return Response(data=context, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,32 +75,71 @@ class ImageDeleteApiView(generics.DestroyAPIView):
     permission_classes = [OwnerPermissions, ]
 
     def delete(self, request, *args, **kwargs):
-        try:
-            image_obj = self.get_object()
-            image_obj.delete()
-            context = {
-                'is_done': True,
-                'message': 'عگس پروفایل با موفقیت جذف شد',
-            }
-            return Response(data=context, status=status.HTTP_200_OK)
-        except  Exception as e:
-            context = {
-                'is_done': False,
-                'message': 'خطا دز انجام عملیات',
-            }
-            return Response(data=context, status=status.HTTP_400_BAD_REQUEST)
+        super().delete(request, *args, **kwargs)
+        return Response({
+            'is_done': True
+        })
 
 
-class ProfileListApiView(generics.GenericAPIView):
+
+
+
+class ProfileListApiView(generics.ListAPIView):
+    
+    """
+    profile list view, exclude blocked user;
+    and search bsae on province
+    """
+    
     serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated, ]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ('province',)
+    ordering_fields = ['created',]
 
-    def get(self, request, *args, **kwargs):
-        blocked_list = request.user.activity_block_from.all()
-        profile_list = Profiles.objecs.exclude(user__id=blocked_list)
-        serializer = self.serializer_class(instance=profile_list, many=True)
-        context = {
-            'is_done': False,
-            'message': 'لیست پروفایل ها',
-            'data': serializer.data
-        }
-        return Response(data=context, status=status.HTTP_200_OK)
+
+    def get_queryset(self):
+        blocked_list = self.request.user.activity_block_from.all().values_list('to_user', flat=True)
+        return Profile.objects.exclude(Q(user_id__in=blocked_list) | Q(user=self.request.user))
+
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        return Response({
+            'is_done':True,
+            'message': 'profile list',
+            'data': response.data
+        })
+
+
+class ProfileFilterApiView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.AllowAny,]
+    queryset = Profile.objects.all()
+
+    # def get_queryset(self):
+    #     blocked_list = self.request.user.activity_block_from.all().values_list('to_user', flat=True)
+    #     return Profile.objects.exclude(Q(user_id__in=blocked_list) | Q(user=self.request.user))
+
+    filter_backends = (filters.DjangoFilterBackend,)
+    # filterset_class = ProfileFilterSet
+
+
+
+class ProfileSearchApiView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated, ]
+    ordering_fields = ['created', ]
+
+    def get_queryset(self):
+        blocked_list = self.request.user.activity_block_from.all().values_list('to_user', flat=True)
+        query=Profile.objects.exclude(Q(user_id__in=blocked_list) | Q(user=self.request.user))
+        return query.filter(user_name__contains=self.request.query_params.get('user_name'))
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        return Response({
+            'is_done': True,
+            'message': 'profile list',
+            'data': response.data
+        })

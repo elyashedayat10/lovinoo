@@ -11,12 +11,16 @@ class Activity(TimeStampedModel):
     """BaseModel to represent Activity relationships"""
 
     from_user = models.ForeignKey(
-        user, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_from",
-        related_query_name='%(app_label)s_%(class)s_from'
+        user,
+        on_delete=models.CASCADE,
+        related_name="%(app_label)s_%(class)s_from",
+        related_query_name="%(app_label)s_%(class)s_from",
     )
     to_user = models.ForeignKey(
-        user, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s_to",
-        related_query_name='%(app_label)s_%(class)s_to'
+        user,
+        on_delete=models.CASCADE,
+        related_name="%(app_label)s_%(class)s_to",
+        related_query_name="%(app_label)s_%(class)s_to",
     )
 
     class Meta:

@@ -12,7 +12,6 @@ from django_jalali.db import models as jmodels
 user = settings.AUTH_USER_MODEL
 from accounts.models import User
 
-
 # Create your models here.
 
 
@@ -35,12 +34,7 @@ class Profile(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-    user_name = models.CharField(
-        blank=True,
-        max_length=125,
-        unique=True,
-        null=True
-    )
+    user_name = models.CharField(blank=True, max_length=125, unique=True, null=True)
     province = models.CharField(
         blank=True,
         max_length=125,
@@ -67,7 +61,7 @@ class Profile(TimeStampedModel):
         choices=GENDER,
     )
     status = models.CharField(
-        default='افلاین',
+        default="افلاین",
         max_length=12,
         choices=Status,
     )
@@ -89,6 +83,12 @@ class Profile(TimeStampedModel):
         if self.birthdate:
             user_age = datetime.date.today().year - self.birthdate.year
             return user_age
+
+    @property
+    def has_image(self):
+        if self.images.all().count() > 0:
+            return True
+        return False
 
 
 class Image(models.Model):

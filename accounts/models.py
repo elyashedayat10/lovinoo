@@ -31,6 +31,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
-class OtpCode(TimeStampedModel):
+class OtpCode(models.Model):
     phone_number = models.CharField(max_length=11)
     code = models.CharField(max_length=6)
+    created = models.DateTimeField(auto_now_add=True)

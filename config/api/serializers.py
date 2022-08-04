@@ -1,6 +1,7 @@
-from rest_framework import serializers
-from ..models import Rules, AboutUs
 from django.utils.safestring import mark_safe
+from rest_framework import serializers
+
+from ..models import AboutUs, Contact, Rules
 
 
 class AboutUsSerializer(serializers.ModelSerializer):
@@ -9,11 +10,11 @@ class AboutUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AboutUs
         fields = (
-            'title',
-            'description',
+            "title",
+            "description",
         )
 
-    def get_content(self, obj):
+    def get_description(self, obj):
         return mark_safe(obj.description)
 
 
@@ -23,9 +24,21 @@ class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rules
         fields = (
-            'title',
-            'description',
+            "title",
+            "description",
         )
 
-    def get_content(self, obj):
+    def get_description(self, obj):
         return mark_safe(obj.description)
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = (
+            'title',
+            'email',
+            'description',
+            'created',
+        )
+        read_only_fields = ('created',)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import ReportedUser, Block
+from ..models import Block, Favorite, ReportedUser
 
 
 class ReportedUserSerializers(serializers.ModelSerializer):
@@ -13,6 +13,7 @@ class ReportedUserSerializers(serializers.ModelSerializer):
             "text",
         )
 
+
     # def get_reported_user(self,obj):
     #     if not  hasattr(obj,'id'):
     #         return None
@@ -24,4 +25,10 @@ class ReportedUserSerializers(serializers.ModelSerializer):
 class BlockCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Block
+        fields = ("to_user",)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
         fields = ("to_user",)

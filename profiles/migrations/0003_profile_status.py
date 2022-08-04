@@ -6,13 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('profiles', '0002_alter_profile_gender'),
+        ("profiles", "0002_alter_profile_gender"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='status',
-            field=models.CharField(choices=[('آنلاین', 'Online'), ('آفلاین', 'Offline')], default='افلاین', max_length=12),
+            model_name="profile",
+            name="status",
+            field=models.CharField(
+                choices=[("آنلاین", "Online"), ("آفلاین", "Offline")],
+                default="افلاین",
+                max_length=12,
+            ),
         ),
     ]

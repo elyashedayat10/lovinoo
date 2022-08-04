@@ -19,12 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=lu#n$omrtzcw3$#6pklr3k5(%$3bkp1#g)+f0o-o3ruzh1brg'
+SECRET_KEY = "django-insecure-=lu#n$omrtzcw3$#6pklr3k5(%$3bkp1#g)+f0o-o3ruzh1brg"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -40,11 +40,16 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "ckeditor",
+    "django_filters",
+    # 'rest_framework_filters',
+
     # custom
     "accounts.apps.AccountsConfig",
     "profiles.apps.ProfilesConfig",
     "activity.apps.ActivityConfig",
     "config.apps.ConfigConfig",
+    "chat.apps.ChatConfig",
+    "financial.apps.FinancialConfig",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +64,7 @@ MIDDLEWARE = [
     # 'profiles.middlewares.SetLastVisitMiddleware',
 ]
 
-ROOT_URLCONF = 'Lovinoo.urls'
+ROOT_URLCONF = "Lovinoo.urls"
 
 TEMPLATES = [
     {
@@ -77,19 +82,19 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Lovinoo.wsgi.application'
+WSGI_APPLICATION = "Lovinoo.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
-        'USER': 'admin',
-        'PASSWORD': '09371516803',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "myproject",
+        "USER": "admin",
+        "PASSWORD": "09371516803",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 
@@ -163,11 +168,13 @@ USER_ONLINE_TIMEOUT = 300
 USER_LASTSEEN_TIMEOUT = 60 * 60 * 24 * 7
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
+
 CKEDITOR_UPLOAD_PATH = "uploads/"

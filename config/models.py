@@ -1,5 +1,6 @@
-from django.db import models
 from ckeditor.fields import RichTextField
+from django.db import models
+
 # Create your models here.
 
 
@@ -33,3 +34,10 @@ class Rules(ConfigBase):
 
 class AboutUs(ConfigBase):
     pass
+
+
+class Contact(models.Model):
+    title = models.CharField(max_length=255)
+    email = models.EmailField()
+    description = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
