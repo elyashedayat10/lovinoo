@@ -24,7 +24,7 @@ SECRET_KEY = "django-insecure-=lu#n$omrtzcw3$#6pklr3k5(%$3bkp1#g)+f0o-o3ruzh1brg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['ws://5.61.28.47:8000', 'ws://5.61.28.47',"*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "ckeditor",
     "django_filters",
+    'channels',
     # 'rest_framework_filters',
 
     # custom
@@ -82,7 +83,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "Lovinoo.wsgi.application"
+# WSGI_APPLICATION = "Lovinoo.wsgi.application"
+# ASGI_APPLICATION ="lovinoo.routing.application"
+ASGI_APPLICATION = 'Lovinoo.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -178,3 +181,29 @@ REST_FRAMEWORK = {
 }
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
+
+
+
+LOGGING = {
+    'version': 1,
+    # The version number of our log
+    'disable_existing_loggers': False,
+    # django uses some of its own loggers for internal operations. In case you want to disable them just replace the False above with true.
+    # A handler for WARNING. It is basically writing the WARNING messages into a file called WARNING.log
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'warning.log',
+        },
+    },
+    # A logger for WARNING which has a handler called 'file'. A logger can have multiple handler
+    'loggers': {
+        # notice the blank '', Usually you would put built in loggers like django or root here based on your needs
+        '': {
+            'handlers': ['file'],  # notice how file variable is called in handler which has been defined above
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

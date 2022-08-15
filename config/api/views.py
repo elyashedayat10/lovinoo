@@ -59,7 +59,7 @@ class CityListApiView(generics.GenericAPIView):
         city_list = [item for item in cities if item['state'] == province]
         context = {
             'is_done': True,
-            'message': 'لیست شهرهای ایران',
+            'message': f'لیست شهرهای {province}',
             'city': city_list
         }
         return Response(data=context, status=status.HTTP_200_OK)

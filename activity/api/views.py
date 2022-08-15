@@ -63,26 +63,52 @@ class FavoriteListApiView(generics.ListAPIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-class AddTOFavoriteApiView(generics.GenericAPIView):
+# class AddTOFavoriteApiView(generics.GenericAPIView):
+#     serializer_class = FavoriteSerializer
+#
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             serializer = self.serializer_class(data=request.data)
+#             if serializer.is_valid(raise_exception=True):
+#                 serializer.save(from_user=request.user)
+#                 context = {
+#                     "is_done": True,
+#                     "message": "کاربر به لیست کاربران مورد علاقه اضاغه شد",
+#                     "data": serializer.data,
+#                 }
+#                 return Response(data=context, status=status.HTTP_201_CREATED)
+#         except:
+#             context = {
+#                 "is_done": False,
+#                 "message": "خطلا در انجام عملیات",
+#             }
+#             return Response(data=context, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+class FavoriteApiView(generics.GenericAPIView):
     serializer_class = FavoriteSerializer
 
     def post(self, request, *args, **kwargs):
-        try:
-            serializer = self.serializer_class(data=request.data)
-            if serializer.is_valid(raise_exception=True):
+        serializer = FavoriteSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            like_obj=Favorite.objects.filter(from_user=request.user,to_user=serializer.validated_data['to_user'])
+            if like_obj.exists():
+                like_obj.delete()
+                context = {
+                    "is_done": True,
+                    "message": "با موفقیت از like ها حذف شد",
+                }
+            else:
                 serializer.save(from_user=request.user)
                 context = {
                     "is_done": True,
-                    "message": "کاربر به لیست کاربران مورد علاقه اضاغه شد",
+                    "message": "با موفقیت به like ها اضافه شد",
                     "data": serializer.data,
                 }
-                return Response(data=context, status=status.HTTP_201_CREATED)
-        except:
-            context = {
-                "is_done": False,
-                "message": "خطلا در انجام عملیات",
-            }
-            return Response(data=context, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(data=context, status=status.HTTP_200_OK)
+        return Response(data={'is_done':False}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class RemoveFromFavoriteApiView(generics.GenericAPIView):
@@ -151,12 +177,8 @@ class BlockRemoveApiView(generics.DestroyAPIView):
     serializer_class = BlockCreateSerializer
 
 
-    def get_queryset(self):
-        blocked_list = self.request.user.activity_block_from.all().values_list(
-            "to_user", flat=True
-        )
-        return Block.objects.filter(fron_user=self.request.user,to_user_id__in=blocked_list)
-
+    def get_object(self):
+        return Block.objects.filter(from_user=self.request.user,to_user_id=self.kwargs.get('pk'))
 
     def delete(self, request, *args, **kwargs):
         super().delete(request,*args,**kwargs)
